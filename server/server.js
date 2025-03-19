@@ -1,4 +1,6 @@
 const express = require("express");
+const dotenv = require("dotenv");
+dotenv.config();
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -18,17 +20,19 @@ const commonFeatureRouter = require("./routes/common/feature-routes");
 //create a database connection -> u can also
 //create a separate file for this and then import/use that file here
 
+const AZURE_COSMOS_CONNECTIONSTRING=process.env.AZURE_COSMOS_CONNECTIONSTRING;
+
 mongoose
-  .connect("db_url")
+  .connect(AZURE_COSMOS_CONNECTIONSTRING)  // Removed deprecated options
   .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+  .catch((error) => console.error("MongoDB connection error:", error));
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5173/", // Allows all origins
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
@@ -37,7 +41,7 @@ app.use(
       "Expires",
       "Pragma",
     ],
-    credentials: true,
+    credentials: false, // Must be false when using '*' for origin
   })
 );
 
@@ -55,5 +59,9 @@ app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
+app.get("/", (req, res) => {
+  res.json({ message: "Hello, welcome to the E-Commerce Backend API!" });
+});
+
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
