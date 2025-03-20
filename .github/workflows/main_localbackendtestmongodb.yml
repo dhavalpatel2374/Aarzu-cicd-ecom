@@ -73,5 +73,5 @@ jobs:
         with:
           app-name: 'localbackendtestmongodb'
           slot-name: 'Production'
-          package: server
+          package: .
           
